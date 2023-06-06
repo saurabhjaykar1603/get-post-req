@@ -1,43 +1,49 @@
-import express from "express";
+import express, { response } from "express";
+import mongoose from "mongoose";
+import Student from "./models/student.js";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
-
 app.use(express.json());
 
-const students = [];
-// GET /students
-app.get('/students', (req, res) => {
-    res.json(students)
-})
-// POST /student 
-app.post('/student', (req, res) => {
-    const obj = {
-        'name': req.body.name,
-        'email': req.body.email,
-        'roll': req.body.roll,
+async function connectMongoDB() {
+    const conn = await mongoose.connect(process.env.MONGO_URL)
 
+    if (conn) {
+        console.log('Mongo DB Connected')
     }
-    students.push(obj);
+    else {
+
+        console.log('Erro')
+    }
+}
+connectMongoDB();
+
+app.post("/student", async (req, res) => {
+    const fullName = req.body.fullName;
+    const email = req.body.email;
+    const regNo = req.body.regNo;
+
+    const newStud = new Student({
+        fullName: fullName,
+        email: email,
+        regNo: regNo
+    })
+    const savedStudent = await newStud.save();
+
     res.json({
-        succces: true,
-        message: "Student added Successfully",
-        data: obj
-    });
+        success: true,
+        massage: "student saved successfully",
+        data: savedStudent
+    })
 })
 
-// GET /student?email=email 
-app.get('/student', (req, res) => {
-    const email = req.query.email;
-
-    const student = students.map((s) => {
-        if( s.email === email){
-            return s;
-        }
-    })
-
+app.get('/students', async (req, res) => {
+    const students = await Student.find();
     res.json({
-        succces: true,
-        data: student
+        success: true,
+        message: 'students fetched syccessfully',
     })
 })
 
