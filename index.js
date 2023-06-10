@@ -46,6 +46,25 @@ app.get('/students', async (req, res) => {
         message: 'students fetched syccessfully',
     })
 })
+app.get('/student', async(req,res)=>{
+    const email = req.query.email;
+    const student = await Student.findOne({email:email})
+    if(student){
+
+       return res.json({
+            success:true,
+            massage: "student Fetched Successfully",
+            data: student
+        })
+    }
+    else{
+        return res.json({
+            success:true,
+            massage: "student Fnot found",
+            data: null
+        })
+    }
+})
 
 app.listen(5000, () => {
     console.log("5000 on bord");
